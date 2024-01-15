@@ -604,6 +604,7 @@ class MessageCenterTargetUser(CoreModel):
 class JiraProject(CoreModel):
     name = models.CharField(max_length=64, verbose_name="项目名称", help_text="项目名称")
     key = models.CharField(max_length=64, verbose_name="键值", help_text="键值")
+    ding_webhook = models.CharField(max_length=255, default="", verbose_name="钉钉webhook", help_text="钉钉webhook")
     remark = models.CharField(max_length=2000, blank=True, null=True, verbose_name="备注", help_text="备注")
     manager = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="jira_projects", verbose_name="负责人",
                                   help_text="负责人")
@@ -633,12 +634,18 @@ class JiraIssue(CoreModel):
     )
     SOURCE_CHOICES = (
         (1, '客户提出'),
+        (2, '内部人员发现'),
+    )
+    STATUS_CHOICES = (
+        (1, '进行中'),
+        (2, '已解决'),
     )
     name = models.CharField(max_length=255, verbose_name="主题", help_text="主题")
     signal_number = models.CharField(max_length=255, verbose_name="标识", help_text="标识")
     description = models.TextField(null=True, blank=True, verbose_name="描述", help_text="描述")
     attachments = models.CharField(max_length=255, null=True, blank=True, verbose_name="附件", help_text="附件")
     type = models.IntegerField(choices=TYPE_CHOICES, default=6, verbose_name="类型", help_text="类型")
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="状态", help_text="状态")
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=2, verbose_name="优先级", help_text="优先级")
     source = models.IntegerField(choices=SOURCE_CHOICES, default=1, verbose_name="来源", help_text="来源")
     deadline = models.DateTimeField(null=True, blank=True, verbose_name="截至日期", help_text="截至日期")

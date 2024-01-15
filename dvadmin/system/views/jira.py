@@ -25,11 +25,27 @@ class JiraViewSet(CustomModelViewSet):
     queryset = JiraProject.objects.all()
     serializer_class = JiraProjectSerializer
 
-    def get_all_issue(self, request):
+    @action(methods=['GET'], detail=False)
+    def get_project_list(self, request):
         queryset = JiraProject.objects.all()
         serializer = JiraProjectSerializer(queryset, many=True)
         data = serializer.data
-        return SuccessResponse()
+        return DetailResponse(data=data)
+
+    @action(methods=['GET'], detail=False)
+    def get_all_issue(self, request):
+        project_id = request.query_params.get('project_id')
+        if not project_id:
+            return ErrorResponse(msg='项目不存在')
+        status = request.query_params.get('status')
+        queryset = JiraProject.objects.filter(project_id=project_id)
+        if status is not None:
+            queryset = queryset.filter(status=status)
+        issues = queryset.all()
+        queryset = JiraProject.objects.all()
+        serializer = JiraProjectSerializer(queryset, many=True)
+        data = serializer.data
+        return DetailResponse(data=data)
 
     @action(methods=['POST'], detail=False)
     def get_issue_detail(self, request):
@@ -65,5 +81,17 @@ class JiraViewSet(CustomModelViewSet):
         data['signal_number'] = str(project.key) + '-' + str(count)
         data['creator_id'] = request.user.id
         data['modifier'] = request.user.id
+        data['status'] = 1
         JiraIssue.objects.create(**data)
         return DetailResponse(data='创建成功')
+
+    @action(methods=['POST'], detail=False)
+    def update_issue(self, request):
+        data = request.data
+        issue = JiraIssue.objects.filter(id=data.get('id'))
+        if not issue:
+            return ErrorResponse(msg='issue不存在')
+        data.pop('id', None)
+        data['modifier'] = request.user.id
+        issue.update(**data)
+        return DetailResponse(data='保存成功')

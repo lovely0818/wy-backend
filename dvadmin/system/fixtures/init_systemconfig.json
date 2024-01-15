@@ -14,25 +14,6 @@
         "children": [
             {
                 "parent": 10,
-                "title": "开启验证码",
-                "key": "captcha_state",
-                "value": true,
-                "sort": 1,
-                "status": true,
-                "data_options": null,
-                "form_item_type": 9,
-                "rule": [
-                    {
-                        "message": "必填项不能为空",
-                        "required": true
-                    }
-                ],
-                "placeholder": "请选择",
-                "setting": null,
-                "children": []
-            },
-            {
-                "parent": 10,
                 "title": "创建用户默认密码",
                 "key": "default_password",
                 "value": "admin123456",
@@ -123,86 +104,6 @@
                 "form_item_type": 7,
                 "rule": [],
                 "placeholder": "请上传登录背景页",
-                "setting": null,
-                "children": []
-            },
-            {
-                "parent": 1,
-                "title": "版权信息",
-                "key": "copyright",
-                "value": "2021-2024 django-vue-admin.com 版权所有",
-                "sort": 4,
-                "status": true,
-                "data_options": null,
-                "form_item_type": 0,
-                "rule": [
-                    {
-                        "message": "必填项不能为空",
-                        "required": true
-                    }
-                ],
-                "placeholder": "请输入版权信息",
-                "setting": null,
-                "children": []
-            },
-            {
-                "parent": 1,
-                "title": "备案信息",
-                "key": "keep_record",
-                "value": "晋ICP备18005113号-3",
-                "sort": 5,
-                "status": true,
-                "data_options": null,
-                "form_item_type": 0,
-                "rule": [
-                    {
-                        "message": "必填项不能为空",
-                        "required": true
-                    }
-                ],
-                "placeholder": "请输入备案信息",
-                "setting": null,
-                "children": []
-            },
-            {
-                "parent": 1,
-                "title": "帮助链接",
-                "key": "help_url",
-                "value": "https://django-vue-admin.com",
-                "sort": 6,
-                "status": true,
-                "data_options": null,
-                "form_item_type": 0,
-                "rule": "",
-                "placeholder": "请输入帮助信息",
-                "setting": null,
-                "children": []
-            },
-            {
-                "parent": 1,
-                "title": "隐私链接",
-                "key": "privacy_url",
-                "value": "/api/system/clause/privacy.html",
-                "sort": 7,
-                "status": true,
-                "data_options": null,
-                "form_item_type": 0,
-                "rule": [],
-                "placeholder": "请填写隐私链接",
-                "setting": null,
-                "children": []
-            },
-            {
-                "parent": 1,
-                "title": "条款链接",
-                "key": "clause_url",
-                "value": "/api/system/clause/terms_service.html",
-                "sort": 8,
-                "status": true,
-                "data_options": null,
-                "form_item_type": 0,
-                "rule": [],
-                "placeholder": "请输入条款链接",
                 "setting": null,
                 "children": []
             }
