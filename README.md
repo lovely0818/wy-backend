@@ -14,7 +14,8 @@ Redis(可选，最新版)
 2. 在项目根目录中，复制 ./conf/env.example.py 文件为一份新的到 ./conf 文件夹下，并重命名为 env.py
 3. 在 env.py 中配置数据库信息
 	mysql数据库版本建议：8.0
-	mysql数据库字符集：utf8mb4
+	mysql数据库字符集：utf8mb4 utf8mb4_general_ci
+   创建database django-vue-admin 编码格式
 4. 安装依赖环境
 	pip3 install -r requirements.txt
 5. 执行迁移命令：
