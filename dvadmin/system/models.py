@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from application import dispatch
-from dvadmin.utils.models import CoreModel, table_prefix, get_custom_app_models
+from dvadmin.utils.models import CoreModel, table_prefix
 
 
 class Role(CoreModel):
@@ -607,7 +607,7 @@ class JiraProject(CoreModel):
     ding_webhook = models.CharField(max_length=255, default="", verbose_name="钉钉webhook", help_text="钉钉webhook")
     remark = models.CharField(max_length=2000, blank=True, null=True, verbose_name="备注", help_text="备注")
     manager = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="jira_projects", verbose_name="负责人",
-                                  help_text="负责人")
+                                help_text="负责人")
 
     class Meta:
         db_table = table_prefix + "jira_project"
@@ -649,12 +649,28 @@ class JiraIssue(CoreModel):
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=2, verbose_name="优先级", help_text="优先级")
     source = models.IntegerField(choices=SOURCE_CHOICES, default=1, verbose_name="来源", help_text="来源")
     deadline = models.DateTimeField(null=True, blank=True, verbose_name="截至日期", help_text="截至日期")
+    resolve_datetime = models.DateTimeField(null=True, blank=True, verbose_name="解决日期", help_text="解决日期")
     assigned = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="jira_issue", verbose_name="指派人",
-                                  help_text="指派人")
-    project = models.ForeignKey(JiraProject, on_delete=models.CASCADE, related_name='jira_issue', verbose_name='所属项目', help_text="所属项目")
+                                 help_text="指派人")
+    project = models.ForeignKey(JiraProject, on_delete=models.CASCADE, related_name='jira_issue', verbose_name='所属项目',
+                                help_text="所属项目")
 
     class Meta:
         db_table = table_prefix + "jira_issue"
         verbose_name = "issue表"
+        verbose_name_plural = verbose_name
+        ordering = ("-create_datetime",)
+
+
+class IssueComment(CoreModel):
+    body = models.TextField(null=True, blank=True, verbose_name="描述", help_text="描述")
+    author = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="issue_comment", verbose_name="创建人",
+                             help_text="创建人")
+    issue = models.ForeignKey(JiraIssue, on_delete=models.CASCADE, related_name='issue_comment', verbose_name='所属issue',
+                                help_text="所属issue")
+
+    class Meta:
+        db_table = table_prefix + "issue_comment"
+        verbose_name = "comment表"
         verbose_name_plural = verbose_name
         ordering = ("-create_datetime",)

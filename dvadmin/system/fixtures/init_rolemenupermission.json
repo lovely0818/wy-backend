@@ -2,9 +2,5 @@
     {
         "role_key": "admin",
         "menu_component_name": "menu"
-    },
-    {
-        "role_key": "public",
-        "menu_component_name": "menu"
     }
 ]

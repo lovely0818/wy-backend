@@ -24,7 +24,7 @@
                 "component_name": "menu",
                 "status": true,
                 "cache": false,
-                "visible": true,
+                "visible": false       ,
                 "parent": 1,
                 "children": [],
                 "menu_button": [
@@ -580,8 +580,11 @@
                 "parent": 10,
                 "children": [],
                 "menu_button": [
+
                 ],
-                "menu_field": []
+                "menu_field": [
+
+                ]
             },{
                 "name": "issue管理",
                 "icon": "iconfont icon-system",
