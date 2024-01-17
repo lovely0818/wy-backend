@@ -650,6 +650,9 @@ class JiraIssue(CoreModel):
     source = models.IntegerField(choices=SOURCE_CHOICES, default=1, verbose_name="来源", help_text="来源")
     deadline = models.DateTimeField(null=True, blank=True, verbose_name="截至日期", help_text="截至日期")
     resolve_datetime = models.DateTimeField(null=True, blank=True, verbose_name="解决日期", help_text="解决日期")
+    pending_datetime = models.DateTimeField(null=True, blank=True, verbose_name="开始处理时间", help_text="开始处理时间")
+    expected_hours = models.IntegerField(default=0, verbose_name="预期工时", help_text="预期工时")
+    actual_hours = models.IntegerField(default=0, verbose_name="实际工时", help_text="实际工时")
     assigned = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="jira_issue", verbose_name="指派人",
                                  help_text="指派人")
     project = models.ForeignKey(JiraProject, on_delete=models.CASCADE, related_name='jira_issue', verbose_name='所属项目',

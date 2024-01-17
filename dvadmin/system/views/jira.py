@@ -8,6 +8,7 @@ from dvadmin.utils.json_response import DetailResponse, SuccessResponse, ErrorRe
 from rest_framework.decorators import action
 from dingtalkchatbot.chatbot import DingtalkChatbot
 from enum import Enum
+from datetime import datetime
 
 
 class JiraProjectSerializer(CustomModelSerializer):
@@ -61,7 +62,6 @@ class JiraViewSet(CustomModelViewSet):
         data = request.data
         JiraProject.objects.filter(id=data.get('id')).delete()
         return DetailResponse(msg='更新成功')
-
 
     @action(methods=['GET'], detail=False)
     def get_project_list(self, request):
@@ -127,7 +127,18 @@ class JiraViewSet(CustomModelViewSet):
         data['modifier'] = request.user.id
         data['status'] = 1
         JiraIssue.objects.create(**data)
-        send_dingtalk_message(project.ding_webhook, '有新的issue：' + data['signal_number'] + ':' + data['name'])
+        assigned_user = Users.objects.get(id=data['assigned_id'])
+        user_serializer = UserSerializer(assigned_user)
+        assigned_name = user_serializer.data.get('name')
+        data['assigned_name'] = assigned_name
+
+        # 获取用户手机号码
+        assigned_mobile = user_serializer.data.get('mobile')
+
+        # 在发送钉钉消息时添加 mobiles 参数
+        send_dingtalk_message(project.ding_webhook,
+                              '有新的issue：' + data['signal_number'] + ':' + data['name'] + '指派给 @' + assigned_name,
+                              mobiles=[assigned_mobile])
         return DetailResponse(data='创建成功')
 
     @action(methods=['POST'], detail=False)
@@ -138,6 +149,7 @@ class JiraViewSet(CustomModelViewSet):
             return ErrorResponse(msg='issue不存在')
         data.pop('id', None)
         data['modifier'] = request.user.id
+        data['update_datetime'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         issue.update(**data)
         return DetailResponse(data='保存成功')
 
@@ -148,7 +160,8 @@ class JiraViewSet(CustomModelViewSet):
         issue = JiraIssue.objects.filter(id=issue_id)
         if not issue:
             return ErrorResponse(msg='issue不存在')
-        update_data = {'resolve_datetime': data.get('deadline'), 'modifier': request.user.id, 'status': 2}
+        update_data = {'resolve_datetime': data.get('resolve_datetime'), 'modifier': request.user.id, 'status': 2,
+                       'update_datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'actual_hours': data.get('actual_hours')}
         JiraIssue.objects.filter(id=issue_id).update(**update_data)
         if data.get('comment'):
             obj = {
@@ -156,15 +169,43 @@ class JiraViewSet(CustomModelViewSet):
                 'author_id': request.user.id,
                 'issue_id': issue_id
             }
-            print(111, obj)
             IssueComment.objects.create(**obj)
+        issue = JiraIssue.objects.get(id=issue_id)
+        issue_serializer = JiraIssueSerializer(issue)
+        project = JiraProject.objects.get(id=issue_serializer.data.get('project'))
+        project_serialize = JiraProjectSerializer(project)
+        if project_serialize.data.get('ding_webhook'):
+            user = Users.objects.get(id=request.user.id)
+            user_serializer = UserSerializer(user)
+            send_dingtalk_message(project.ding_webhook, user_serializer.data.get('name')+'解决了issue:' + issue_serializer.data.get('signal_number')+' '+issue_serializer.data.get('name'), mobiles=None)
         return DetailResponse(data='保存成功')
 
+    @action(methods=['POST'], detail=False)
+    def confirm_issue(self, request):
+        data = request.data
+        issue = JiraIssue.objects.filter(id=data.get('id'))
+        if not issue:
+            return ErrorResponse(msg='issue不存在')
+        params = {
+            'pending_datetime': data.get('pending'),
+            'expected_hours': data.get('expected_hours'),
+            'update_datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'modifier': request.user.id
+        }
+        JiraIssue.objects.filter(id=data.get('id')).update(**params)
+        return DetailResponse(msg='保存成功')
 
-def send_dingtalk_message(webhook, msg):
+
+def send_dingtalk_message(webhook, msg, mobiles):
     try:
         bot = DingtalkChatbot(webhook)
-        bot.send_text(msg=msg)
+        if mobiles:
+            bot.send_text(msg=msg, at_mobiles=mobiles)
+        else:
+            bot.send_text(msg=msg)
+        print(webhook)
+        print(msg)
+        print(mobiles)
         print("Dingtalk message sent successfully!")
     except Exception as e:
         print(f"Error sending Dingtalk message: {str(e)}")
